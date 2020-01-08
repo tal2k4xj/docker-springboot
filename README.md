@@ -273,7 +273,9 @@ $ docker run --name employee-jdbc-container -p 8080:8080 -d employee-jdbc
 
 # References
 https://openliberty.io/blog/2018/07/02/creating-dual-layer-docker-images-for-spring-boot-apps.html
+
 https://spring.io/guides/gs/spring-boot-docker/
+
 https://www.javainuse.com/devOps/docker/docker-mysql
 
 
