@@ -12,7 +12,7 @@ You will have to login with your IBM Cloud user and then use the password : iksl
 
 Copy git repo:
 ```
-$ git clone https://github.com/tal2k4xj/microservices-java.git	
+$ git clone https://github.com/tal2k4xj/docker-springboot.git	
 ```
 
 Change directory:
