@@ -123,9 +123,14 @@ Most of the time we usualy rebuild our docker images when the code changes and w
 
 To understand how to do that we can just do the following example.
 
-Open our Dockerfile and change it:
+First remove our old Dockerfile:
 ```
-$ nano Dockerfile
+$ rm Dockerfile
+```
+
+Download the new dockerfile:
+```
+$
 ```
 
 ```dockerfile
@@ -200,7 +205,11 @@ COPY --from=staging /staging/myThinApp /opt/ol/wlp/usr/servers/springServer/apps
 EXPOSE 9080
 CMD ["/opt/ol/wlp/bin/server", "run", "springServer"]
 ```
- 
+
+Now build new image with the new dockerfile:
+```
+$ docker build --build-arg JAR_FILE=target/demo-0.0.1-SNAPSHOT.jar -t hello-springboot:1.0 .
+```
 
 
 # Exercise 3: Understand Buildconfig Strategy Options
