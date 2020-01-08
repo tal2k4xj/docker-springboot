@@ -241,9 +241,40 @@ $ docker run -d -p 8080:8080 hello-springboot:3.0
 
 Now we also able to do the mvn build everywhere even if we dont have the mvn installed.
 
+# Exercise 5: Springboot with mysql
+
+Run docker with sql:
+```
+$ docker run --name mysqldb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=bootdb -d mysql:8
+```
+
+Get inside the sql docker and check the environment:
+```
+$ docker exec -it mysqldb bash; 
+
+$ mysql -u root -p
+Password : root
+
+$ show databases;
+```
+
+Run the springboot application that will connect to mysql:
+```
+$ git clone https://github.com/tal2k4xj/docker-springboot.git
+
+$ cd docker-springboot/employee-jdbc/
+
+$ mvn clean package -DskipTests
+
+$ docker build -t employee-jdbc .
+
+$ docker run --name employee-jdbc-container -p 8080:8080 -d employee-jdbc
+```
+
 # References
 https://openliberty.io/blog/2018/07/02/creating-dual-layer-docker-images-for-spring-boot-apps.html
 https://spring.io/guides/gs/spring-boot-docker/
+https://www.javainuse.com/devOps/docker/docker-mysql
 
 
 
