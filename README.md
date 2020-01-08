@@ -241,7 +241,9 @@ $ docker run -d -p 8080:8080 hello-springboot:3.0
 
 Now we also able to do the mvn build everywhere even if we dont have the mvn installed.
 
-# Exercise 4: 
+# References
+https://openliberty.io/blog/2018/07/02/creating-dual-layer-docker-images-for-spring-boot-apps.html
+https://spring.io/guides/gs/spring-boot-docker/
 
 
 
