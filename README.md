@@ -190,6 +190,8 @@ a3562aa0b991        8 months ago         /bin/sh -c set -x  && apk add --no-cach
 <missing>           8 months ago         /bin/sh -c #(nop) ADD file:a86aea1f3a7d68f6a…   5.53MB
 ```
 
+![dockerduallayer](./assets/dockerduallayer.png)
+
 # Exercise 4: Build multi stage Dockerfile
 
 Now that we understand how to use Dockerfile more efficiently we can add another complexity with multi-stage.
