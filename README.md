@@ -34,7 +34,9 @@ Go to port 8080 and add /api/hello to see our application running:
 
 Before we build the dockerfile we need to package the application to jar file:
 ```
-$ mvn clean -Dmaven.test.skip package
+$ mvn clean -Dmaven.test.skip package 
+or
+$ ./mvnw install
 ```
 
 Create a Dockerfile:
@@ -123,93 +125,127 @@ Most of the time we usualy rebuild our docker images when the code changes and w
 
 To understand how to do that we can just do the following example.
 
-First remove our old Dockerfile:
+A Spring Boot fat jar naturally has "layers" because of the way that the jar itself is packaged. If we unpack it first it will already be divided into external and internal dependencies. To do this in one step in the docker build, we need to unpack the jar first:
+```
+$ mkdir target/dependency
+$ cd target/dependency
+$ jar xf ../demo-0.0.1-SNAPSHOT.jar
+$ cd ~/docker-springboot/springdemo/
+```
+
+Now remove our old Dockerfile:
 ```
 $ rm Dockerfile
 ```
 
-Download the new dockerfile:
+Create new Dockerfile:
 ```
-$
+$ nano Dockerfile
 ```
+
+And paste the following example:
 
 ```dockerfile
-FROM adoptopenjdk/openjdk8-openj9 as staging
-
-ARG JAR_FILE
-ENV SPRING_BOOT_VERSION 2.0
-
-# Install unzip; needed to unzip Open Liberty
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends unzip \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Open Liberty
-ENV LIBERTY_SHA 4170e609e1e4189e75a57bcc0e65a972e9c9ef6e
-ENV LIBERTY_URL https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2018-06-19_0502/openliberty-18.0.0.2.zip
-
-RUN curl -sL "$LIBERTY_URL" -o /tmp/wlp.zip \
-   && echo "$LIBERTY_SHA  /tmp/wlp.zip" > /tmp/wlp.zip.sha1 \
-   && sha1sum -c /tmp/wlp.zip.sha1 \
-   && mkdir /opt/ol \
-   && unzip -q /tmp/wlp.zip -d /opt/ol \
-   && rm /tmp/wlp.zip \
-   && rm /tmp/wlp.zip.sha1 \
-   && mkdir -p /opt/ol/wlp/usr/servers/springServer/ \
-   && echo spring.boot.version="$SPRING_BOOT_VERSION" > /opt/ol/wlp/usr/servers/springServer/bootstrap.properties \
-   && echo \
-'<?xml version="1.0" encoding="UTF-8"?> \
-<server description="Spring Boot Server"> \
-  <featureManager> \
-    <feature>jsp-2.3</feature> \
-    <feature>transportSecurity-1.0</feature> \
-    <feature>websocket-1.1</feature> \
-    <feature>springBoot-${spring.boot.version}</feature> \
-  </featureManager> \
-  <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="9080" httpsPort="9443" /> \
-  <include location="appconfig.xml"/> \
-</server>' > /opt/ol/wlp/usr/servers/springServer/server.xml \
-   && /opt/ol/wlp/bin/server start springServer \
-   && /opt/ol/wlp/bin/server stop springServer \
-   && echo \
-'<?xml version="1.0" encoding="UTF-8"?> \
-<server description="Spring Boot application config"> \
-  <springBootApplication location="app" name="Spring Boot application" /> \
-</server>' > /opt/ol/wlp/usr/servers/springServer/appconfig.xml
-
-# Stage the fat JAR
-COPY ${JAR_FILE} /staging/myFatApp.jar
-
-# Thin the fat application; stage the thin app output and the library cache
-RUN /opt/ol/wlp/bin/springBootUtility thin \
- --sourceAppPath=/staging/myFatApp.jar \
- --targetThinAppPath=/staging/myThinApp.jar \
- --targetLibCachePath=/staging/lib.index.cache
-
-# unzip thin app to avoid cache changes for new JAR
-RUN mkdir /staging/myThinApp \
-   && unzip -q /staging/myThinApp.jar -d /staging/myThinApp
-
-# Final stage, only copying the liberty installation (includes primed caches)
-# and the lib.index.cache and thin application
-FROM adoptopenjdk/openjdk8-openj9
-
+FROM openjdk:8-jdk-alpine
 VOLUME /tmp
-
-# Create the individual layers
-COPY --from=staging /opt/ol/wlp /opt/ol/wlp
-COPY --from=staging /staging/lib.index.cache /opt/ol/wlp/usr/shared/resources/lib.index.cache
-COPY --from=staging /staging/myThinApp /opt/ol/wlp/usr/servers/springServer/apps/app
-
-# Start the app on port 9080
-EXPOSE 9080
-CMD ["/opt/ol/wlp/bin/server", "run", "springServer"]
+ARG DEPENDENCY=target/dependency
+COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY ${DEPENDENCY}/META-INF /app/META-INF
+COPY ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["java","-cp","app:app/lib/*","com.example.demo.DemoApplication"]
 ```
 
 Now build new image with the new dockerfile:
 ```
-$ docker build --build-arg JAR_FILE=target/demo-0.0.1-SNAPSHOT.jar -t hello-springboot:1.0 .
+$ docker build -t hello-springboot:2.0 .
 ```
 
+And run the new image:
+```
+$ docker run -d -p 8080:8080 hello-springboot:2.0
+```
 
-# Exercise 3: Understand Buildconfig Strategy Options
+Now copy the IMAGE ID of `hello-springboot` and do the following command:
+```
+$ docker history <IMAGE-ID>
+```
+
+Now take a look at the addition layers that you just added by building the multi layer docker file:
+```
+IMAGE               CREATED              CREATED BY                                      SIZE                COMMENT
+5da74f509ae0        About a minute ago   /bin/sh -c #(nop)  ENTRYPOINT ["java" "-cp" …   0B                  
+eefc29c2c9b5        About a minute ago   /bin/sh -c #(nop) COPY dir:a8d06fea70dbb72e9…   1.56kB              
+a0c37335698c        About a minute ago   /bin/sh -c #(nop) COPY dir:60040a004074f4812…   1.81kB              
+ce77f313f4a7        About a minute ago   /bin/sh -c #(nop) COPY dir:127f2f5e57810b32d…   17.5MB              
+70fbb718f3b8        About a minute ago   /bin/sh -c #(nop)  ARG DEPENDENCY=target/dep…   0B                  
+655e4910513a        About a minute ago   /bin/sh -c #(nop)  VOLUME [/tmp]                0B                  
+a3562aa0b991        8 months ago         /bin/sh -c set -x  && apk add --no-cache   o…   99.3MB              
+<missing>           8 months ago         /bin/sh -c #(nop)  ENV JAVA_ALPINE_VERSION=8…   0B                  
+<missing>           8 months ago         /bin/sh -c #(nop)  ENV JAVA_VERSION=8u212       0B                  
+<missing>           8 months ago         /bin/sh -c #(nop)  ENV PATH=/usr/local/sbin:…   0B                  
+<missing>           8 months ago         /bin/sh -c #(nop)  ENV JAVA_HOME=/usr/lib/jv…   0B                  
+<missing>           8 months ago         /bin/sh -c {   echo '#!/bin/sh';   echo 'set…   87B                 
+<missing>           8 months ago         /bin/sh -c #(nop)  ENV LANG=C.UTF-8             0B                  
+<missing>           8 months ago         /bin/sh -c #(nop)  CMD ["/bin/sh"]              0B                  
+<missing>           8 months ago         /bin/sh -c #(nop) ADD file:a86aea1f3a7d68f6a…   5.53MB
+```
+
+# Exercise 4: Build multi stage Dockerfile
+
+Now that we understand how to use Dockerfile more efficiently we can add another complexity with multi-stage.
+Lets have a look at the following example.
+
+As we did remove our Dockerfile again:
+```
+$ rm Dockerfile
+```
+
+Create new Dockerfile:
+```
+$ nano Dockerfile
+```
+
+Copy & paste the dockerfile below:
+```dockerfile
+FROM openjdk:8-jdk-alpine as build
+WORKDIR /workspace/app
+
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
+
+RUN ./mvnw install -DskipTests
+RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+ARG DEPENDENCY=/workspace/app/target/dependency
+COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
+COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["java","-cp","app:app/lib/*","com.example.demo.DemoApplication"]
+```
+
+Now build the new image again with the new dockerfile:
+```
+$ docker build -t hello-springboot:3.0 .
+```
+
+And run the new image:
+```
+$ docker run -d -p 8080:8080 hello-springboot:3.0
+```
+
+Now we also able to do the mvn build everywhere even if we dont have the mvn installed.
+
+# Exercise 4: 
+
+
+
+
+
+
+
+
+
