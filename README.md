@@ -34,8 +34,6 @@ Go to port 8080 and add /api/hello to see our application running:
 
 Before we build the dockerfile we need to package the application to jar file:
 ```
-$ mvn clean -Dmaven.test.skip package 
-or
 $ ./mvnw install
 ```
 
@@ -61,7 +59,7 @@ $ docker build --build-arg REVISION=0.0.1 -t hello-springboot:1.0 .
 
 Run the application:
 ```
-docker run -d -p 8080:8080 hello-springboot:1.0
+$ docker run -d -p 8080:8080 hello-springboot:1.0
 ```
 
 Check that the docker is running:
