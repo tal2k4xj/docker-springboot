@@ -8,6 +8,154 @@ You will have to login with your IBM Cloud user and then use the password : iksl
 1) Select the account with the openshift cluster.
 2) Start the terminal.
 
+# Exercise 0: Hello world & basic commands
+
+See your environment information
+```
+$ docker info
+```
+
+See all images in your local machine
+```
+$ docker images
+```
+
+See all the running containers (processes) in your local machine
+```
+$ docker ps
+or
+$ docker container ls
+```
+
+Pull image from Docker registry (currently docker hub)
+```
+$ docker pull hello-world
+```
+
+Run image at local machine
+```
+$ docker run hello-world
+```
+
+See all running containers with 'ALL' tag
+```
+$ docker ps -a
+```
+
+Run alpine container with command
+```
+$ docker run alpine:latest "echo" "Hello, World"
+```
+
+See alpine image
+```
+$ docker images | grep alpine
+```
+
+Run alpine container and get inside the Shell
+```
+$ docker run -it alpine:latest /bin/sh
+```
+
+Check if curl command is avaliable
+```
+$ curl
+```
+
+Update package manager
+```
+$ apk update
+```
+
+Install curl
+```
+$ apk add curl
+```
+
+Check that curl is now available 
+```
+$ curl
+```
+
+Exit the container
+```
+$ exit
+```
+
+Run the container again go get in the Shell
+```
+$ docker run -it alpine:latest /bin/sh
+```
+
+See that curl is not available anymore because its a new container
+```
+$ curl
+```
+
+Your first docker file
+```
+$ mkdir lab0
+$ cd lab0
+```
+
+Create html page for our basic application
+```
+$ echo '<html><body><h1>Hello World from Dockerfile</h1></body></html>' > index.html
+```
+
+Create the docker file
+```
+$ nano Dockerfile
+```
+
+Copy & Paste the following to the docker file
+```
+FROM nginx 
+COPY index.html /usr/share/nginx/html
+```
+
+Check that both Dockerfile and html created
+```
+$ ls
+```
+
+Use build command to build our image
+```
+$ docker build  ./ -t dockerfile-nginx
+```
+
+Run the container with our new image
+```
+$ docker run -d --name new-nginx -p 8080:80 dockerfile-nginx
+```
+
+See the running proccess
+```
+$ docker ps |grep -i nginx
+```
+
+Go to port 8080 and see your app running
+
+Now to stop the running container we need the container id and use the following command
+```
+$ docker stop <container id>
+```
+
+Now we can use the following command to free our occupied resources
+```
+$ docker system prune
+```
+
+If we want to just remove one container we could run this command as well
+```
+$ docker rm -f <container id>
+```
+
+To remove image we can use this command but we need the image id
+```
+$ docker rmi -f <image id>
+```
+
 # Exercise 1: Deploying your first Springboot app
 
 Copy git repo:
