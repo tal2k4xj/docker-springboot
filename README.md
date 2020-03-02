@@ -1,12 +1,8 @@
 # Prerequisite
 
-Before we will start the exercise you will need to go to IBM Cloud Shell to get ready to use environment : https://workshop.shell.cloud.ibm.com/
-You will have to login with your IBM Cloud user and then use the password : ikslab
+Install Docker desktop : https://docs.docker.com/install/
 
-![setshell](./assets/setshell.png)
-
-1) Select the account with the openshift cluster.
-2) Start the terminal.
+Or follow this guide to use Virtualbox: https://itsfoss.com/install-linux-in-virtualbox/
 
 # Exercise 0: Hello world & basic commands
 
