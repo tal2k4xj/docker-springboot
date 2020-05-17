@@ -169,8 +169,7 @@ Run Springboot application:
 $ mvn spring-boot:run
 ```
 
-Go to port 8080 and add /api/hello to see our application running:
-*(https://p8080-user-ibmid-<somerandomid>.workshop.us-south.shell.cloud.ibm.com/api/hello)*
+Go to port http://localhost:8080/api/hello to see our application running:
 
 ![gotoport](./assets/gotoport.png)
 
@@ -217,8 +216,7 @@ CONTAINER ID        IMAGE                  COMMAND                  CREATED     
 4b51950322c4        hello-springboot:1.0   "java -Djava.securit…"   5 seconds ago       Up 4 seconds        0.0.0.0:8080->8080/tcp   dreamy_mclean
 ```
 
-Go to port 8080 again and add /api/hello to see our application running:
-*(https://p8080-user-ibmid-<somerandomid>.workshop.us-south.shell.cloud.ibm.com/api/hello)*
+Go again to port http://localhost:8080/api/hello to see our application running:
 
 ![dockerport](./assets/dockerport.png)
 
