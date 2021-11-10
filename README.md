@@ -1,5 +1,7 @@
 # Prerequisite
 
+Register to IBM Cloud : https://ibm.biz/Bdf85L
+
 Install Docker desktop : https://docs.docker.com/install/
 
 Or follow this guide to use Virtualbox: https://itsfoss.com/install-linux-in-virtualbox/
